@@ -4,4 +4,9 @@ def imprimir():
 
 # COMMAND ----------
 
+import sys
+print("\n".join(sys.path))
+
+# COMMAND ----------
+
 

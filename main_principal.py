@@ -1,5 +1,5 @@
 # Databricks notebook source
-from sample import con
+from sample import main
 
 # COMMAND ----------
 
