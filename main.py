@@ -39,7 +39,6 @@ def create_database_catalog():
 def main():
     try:
         create_database_catalog()
-        
     except:
         subject=f"Error log date {date_process['today']}"
         msg="Error creating databases in databricks please review"
@@ -54,3 +53,7 @@ def main():
 # COMMAND ----------
 
 main()
+
+# COMMAND ----------
+
+

@@ -17,14 +17,6 @@ databases={
     'gold' : 'gold_data_rakez'
 }
 
-region={
-    'region_name': 'us-west-1'
-}
-
-role = {
-    'role_arn':'arn:aws:iam::393747608406:role/service-role/AWSGlueServiceRole-dremiofiles'
-}
-
 # COMMAND ----------
 
 # COMMAND ----------
@@ -154,7 +146,5 @@ aggregate_queries = {
 # COMMAND ----------
 
 # DBTITLE 1,Method for saving table as delta table
-def save_delta_table(df,path_delta):
-    df.write.format("delta").mode("overwrite").save(path_delta)
-
-client=8
+def save_delta_table(df,path_delta,database,table_name):
+    df.write.format("delta").mode("overwrite").option("path",path_delta).saveAsTable(f"{database}.{table_name}")
