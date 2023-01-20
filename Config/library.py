@@ -39,4 +39,17 @@ dbutils.fs.ls('/mnt/datalake/')
 
 # COMMAND ----------
 
+# MAGIC %sh pwd
+
+# COMMAND ----------
+
+import sys
+print("\n".join(sys.path))
+
+# COMMAND ----------
+
+import tables_config
+
+# COMMAND ----------
+
 

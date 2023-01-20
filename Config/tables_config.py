@@ -8,6 +8,7 @@
 from pyspark.sql.types import *
 from delta import *
 import boto3
+from . import library
 
 # COMMAND ----------
 
@@ -317,6 +318,14 @@ create_crawler_gold_zone();
 # COMMAND ----------
 
 dbutils.fs.ls('./')
+
+# COMMAND ----------
+
+# MAGIC %sh pwd
+
+# COMMAND ----------
+
+from library import *
 
 # COMMAND ----------
 
