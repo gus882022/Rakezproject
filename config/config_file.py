@@ -9,6 +9,8 @@ from pyspark.sql import SparkSession
 import time
 import json
 import boto3
+import subprocess
+import sys
 from datetime import date
 
 # COMMAND ----------
@@ -53,3 +55,5 @@ def send_notification(subject,msg):
            Subject=subject,
            Message=msg
         )
+
+

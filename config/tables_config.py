@@ -22,6 +22,7 @@ databases={
 # COMMAND ----------
 
 # DBTITLE 1,Tables Schema
+
 tables_schema_config = {
                         'schema':{
                             'sales':{
@@ -41,6 +42,17 @@ tables_schema_config = {
                                                  'path_table':
                                                              {
                                                                 'path_sales_stores' :'/sales/stores/'
+                                                             },
+                                                 'rules_table':
+                                                             {
+                                                                 'store_id' : {
+                                                                                 'isComplete':True,
+                                                                                 'isNonNegative':True
+                                                                              },
+                                                                 'store_name' : {
+                                                                                 'isComplete':True,
+                                                                                 'isNonNegative':True
+                                                                              }
                                                              }
                                             },
                                       'staffs': 

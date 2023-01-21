@@ -1,5 +1,14 @@
 # Databricks notebook source
 # MAGIC %md
+# MAGIC ### Install libraries
+
+# COMMAND ----------
+
+# MAGIC %pip install pydeequ
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC ### Autoreload config files
 
 # COMMAND ----------
@@ -16,6 +25,7 @@
 
 from config.config_file import *
 from config.tables_config import *
+from pydeequ import *
 
 # COMMAND ----------
 
@@ -53,6 +63,10 @@ def main():
 # COMMAND ----------
 
 main()
+
+# COMMAND ----------
+
+dbutils.fs.ls('/mnt/')
 
 # COMMAND ----------
 
