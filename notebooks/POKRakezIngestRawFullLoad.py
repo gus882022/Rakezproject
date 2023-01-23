@@ -18,6 +18,7 @@ from config.tables_config import *
 from pyspark.sql import functions as F
 from pyspark.sql.functions import *
 from datetime import date
+from pyspark.sql.functions import col
 
 
 # COMMAND ----------

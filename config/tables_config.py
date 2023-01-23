@@ -8,6 +8,12 @@
 from pyspark.sql.types import *
 from pyspark.sql import SparkSession
 from delta import *
+from pydeequ import *
+from pydeequ.profiles import *
+from pydeequ.analyzers import *
+from pydeequ.suggestions import *
+from pydeequ.checks import *
+from pydeequ.verification import *
 import boto3
 
 # DBTITLE 1,Define parameters from data
@@ -46,13 +52,16 @@ tables_schema_config = {
                                                  'rules_table':
                                                              {
                                                                  'store_id' : {
-                                                                                 'isComplete':True,
-                                                                                 'isNonNegative':True
+                                                                                 'isComplete': 'isComplete',
+                                                                                 'isNonNegative':'isNonNegative',
+                                                                                 'isContainedIn':["USD", "AED"],
+                                                                                 'hasDataType': ConstrainableDataTypes.Boolean
                                                                               },
                                                                  'store_name' : {
-                                                                                 'isComplete':True,
-                                                                                 'isNonNegative':True
-                                                                              }
+                                                                                 'isComplete':'isComplete',
+                                                                                 'isNonNegative':'isNonNegative',
+                                                                                 'hasMaxLength':lambda y: y==3
+                                                                                 }
                                                              }
                                             },
                                       'staffs': 

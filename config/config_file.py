@@ -55,5 +55,10 @@ def send_notification(subject,msg):
            Subject=subject,
            Message=msg
         )
+    
+path_file_rules={
+    'path': '/dbfs/mnt/datalake/libraries_bucket/Account_business_rules_input.xlsx',
+    'sheet_name':'example'
+}
 
 
