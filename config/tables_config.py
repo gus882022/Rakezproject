@@ -14,6 +14,7 @@ from pydeequ.analyzers import *
 from pydeequ.suggestions import *
 from pydeequ.checks import *
 from pydeequ.verification import *
+
 import boto3
 
 # DBTITLE 1,Define parameters from data
@@ -169,3 +170,4 @@ aggregate_queries = {
 # DBTITLE 1,Method for saving table as delta table
 def save_delta_table(df,path_delta,database,table_name):
     df.write.format("delta").mode("overwrite").option("path",path_delta).saveAsTable(f"{database}.{table_name}")
+    

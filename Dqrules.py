@@ -141,6 +141,11 @@ def read_rules_from_excel_file(table_name,df):
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ### Main Execution
+
+# COMMAND ----------
+
 
 schemas_config=table_schema['schema']
 schema = StructType([
@@ -170,6 +175,11 @@ for schema in schemas_config.keys():
 
 display(complete_df)
   
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### Add new Columns
 
 # COMMAND ----------
 

@@ -9,40 +9,56 @@
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ### Import Libraries and config files
+
+# COMMAND ----------
+
 from pyspark.sql.types import *
 from pyspark.sql import SparkSession
 import time
 import json
 from config.config_file import *
-from config.tables_config import *
 from pyspark.sql import functions as F
 from pyspark.sql.functions import *
-from datetime import date
 from pyspark.sql.functions import col
+
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### Declaration of variables
+
+# COMMAND ----------
+
+table_schema = tables_schema_config
+path_raw_datalake = paths_datalake['raw_bucket']
+path_silver_datalake = paths_datalake['silver_bucket']
+database = databases['silver']
+date = date_process['today']
+
+print(database)
+print(path_raw_datalake)
+print(path_silver_datalake)
 
 
 # COMMAND ----------
 
 # DBTITLE 1,Declaration of Variables
 table_schema = tables_schema_config
-path_staging_datalake = paths_datalake['staging_area']
 path_raw_datalake = paths_datalake['raw_bucket']
 path_silver_datalake = paths_datalake['silver_bucket']
-path_gold_datalake = paths_datalake['gold_bucket']
-path_raw_datalake_s3 = paths_datalake_s3['raw_bucket']
-path_silver_datalake_s3 = paths_datalake_s3['silver_bucket']
-path_gold_datalake_s3 = paths_datalake_s3['gold_bucket']
-database_raw = databases['raw']
+database = databases['silver']
 
-print(database_raw)
-print(path_staging_datalake)
+
+print(database)
 print(path_raw_datalake)
 print(path_silver_datalake)
-print(path_gold_datalake)
 
 
 # COMMAND ----------
 
+# pyspark example code for reading data from S3
 schemas_config=table_schema['schema']
 list_logs_tables={}
 for schema in schemas_config.keys():
