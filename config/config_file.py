@@ -40,25 +40,51 @@ aws_parameters={
 
 # Path to read DQ rules file
 path_file_rules={
-                    'path': '/dbfs/mnt/datalake/libraries_bucket/Account_business_rules_input.xlsx',
+                    'path': 's3://demodmsgbraw/libraries/Account_business_rules_input.xlsx',
                     'sheet_name':'example'
                 }
 
 # Dictionary for table schema
 tables_schema_config = {
                           'Tables': {
-                                      'candidate': {
-                                                        'fields':{'Id':StringType(),
-                                                                  'Name': StringType(),
-                                                                  'Company': StringType(),
-                                                                  'State': StringType(),
-                                                                  'Email': StringType(),
-                                                                  'Status': StringType(),
-                                                                  'CreatedDate':TimestampType()
+                                        'candidate': {
+                                                        'fields':{'Id':"String",
+                                                                  'Name': "String",
+                                                                  'Company': "String",
+                                                                  'State': "String",
+                                                                  'Email': "String",
+                                                                  'Status': "String",
+                                                                  'CreatedDate': "Timestamp"
                                                                  },
                                                         'path':'candidate/',
                                                         'partition':[''],
-                                                        'primary_key':['Id','Name']
+                                                        'primary_key':['Id']
+                                                   },
+                                        'account': {
+                                                        'fields':{'Id':"String",
+                                                                  'Name': "String",
+                                                                  'Site': "String",
+                                                                  'Phone': "String",
+                                                                  'Type': "String",
+                                                                  'BillingState': "String"
+                                                                 },
+                                                        'path':'account/',
+                                                        'partition':[''],
+                                                        'primary_key':['Id']
+                                                   },
+                                       'campaign': {
+                                                        'fields':{'Id':"String",
+                                                                  'Name': "String",
+                                                                  'Type': "String",
+                                                                  'StartDate': "Date",
+                                                                  'EndDate': "Date",
+                                                                  'Status': "String",
+                                                                  'ActualCost': "String",
+                                                                  'BudgetedCost': "String"
+                                                                 },
+                                                        'path':'Campaign/',
+                                                        'partition':[''],
+                                                        'primary_key':['Id']
                                                    }
                                     }
                         }

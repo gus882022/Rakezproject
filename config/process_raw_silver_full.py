@@ -24,6 +24,7 @@ from pyspark.sql.functions import *
 from pyspark.sql.functions import col
 
 
+
 # create spark session
 spark = SparkSession.builder.appName('raw_silver_full').getOrCreate()
 
@@ -104,13 +105,16 @@ def save_delta_table():
                     count_read_regs = df.count()
                     query=f"select count(*) as regs from {database}.{table}"
                     count_write_regs = spark.sql(query).collect()[0]["regs"]
-                    
+                    spark.sql(f"select * from {database}.{table}").show()
                     # save in the log list 
                     log_file.append([table,"Table Sucessfull Loaded",count_write_regs,count_read_regs])
             else:
                 log_file.append([table,"Don't exist data for the table",0,0])
     except Exception as e:
-        log_file.append([table,e,0,0])
+        log_file.append([table,str(e),0,0])
+        subject=f"Error log date {date_process['today']}"        
+        msg=f"""Error creating databases in databricks please review ERROR is: {e}"""
+        send_notification(subject=subject,msg=msg)
 
     # Convert log list into a Dataframe
     logColumns = ["TableName","Status","Rows_Loaded","Rows_Readed"]
@@ -143,7 +147,3 @@ def main_raw_silver_full():
     
     # send notification to the email
     send_notification(subject=f"RAW TO SILVER ZONE FULL LOAD -> LOG FOR DAY {date} ",msg=html_content)
-
-# COMMAND ----------
-
-main_raw_silver_full()

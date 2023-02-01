@@ -16,7 +16,7 @@
 
 from config.config_file import *
 from pydeequ import *
-from config.
+from config.process_raw_silver_full import *
 
 # COMMAND ----------
 
@@ -38,27 +38,30 @@ def create_database_catalog():
 # COMMAND ----------
 
 def main():
-    try:
-        # Send start notification 
-        subject=f"Start Process Date {date_process['today']}"    
-        msg=f"""The process for day {date_process['today']} has started"""
-        send_notification(subject=subject,msg=msg)
+    #try:
+    # Send start notification 
+    subject=f"Start Process Date {date_process['today']}"    
+    msg=f"""The process for day {date_process['today']} has started"""
+    send_notification(subject=subject,msg=msg)
+
+    # create databases into databricks system
+    create_database_catalog()
+    dbutils.notebook.run("notebooks/POKRakezIngestRawFullLoadsparkSQL",0)
+    dbutils.notebook.run("notebooks/POKRakezIngestRawFullLoadsparkSQL",0)
+    dbutils.notebook.run("notebooks/POKRakezIngestRawFullLoadsparkSQL",0)
+
+
+    # Send finish notification 
+
+    subject=f"Finish Process Date {date_process['today']}"    
+    msg=f"""The process for day {date_process['today']} has finished"""
+    send_notification(subject=subject,msg=msg)
         
-        # create databases into databricks system
-        create_database_catalog()
         
-        
-        # Send finish notification 
-        
-        subject=f"Finish Process Date {date_process['today']}"    
-        msg=f"""The process for day {date_process['today']} has finished"""
-        send_notification(subject=subject,msg=msg)
-        
-        
-    except Exception as e:
-        subject=f"Error log date {date_process['today']}"        
-        msg=f"""Error creating databases in databricks please review ERROR is: {e}"""
-        send_notification(subject=subject,msg=msg)
+    #except Exception as e:
+    #    subject=f"Error log date {date_process['today']}"        
+    #    msg=f"""Error creating databases in databricks please review ERROR is: {e}"""
+    #    send_notification(subject=subject,msg=msg)
         
 
 # COMMAND ----------
@@ -115,6 +118,17 @@ send_notification(msg="Hola",subject="Hola")
 # COMMAND ----------
 
 dbutils.fs.cp('s3a://demodmsgbraw/candidate/','s3a://demodmsgbraw/processed/candidate',True)
+
+# COMMAND ----------
+
+dbutils.notebook.run("notebooks/POKRakezIngestRawFullLoadsparkSQL",0)
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC use silver_data_rakez;
+# MAGIC 
+# MAGIC show tables
 
 # COMMAND ----------
 

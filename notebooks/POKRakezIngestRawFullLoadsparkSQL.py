@@ -47,11 +47,10 @@ database = databases['silver']
 def save_delta_table():
     # read dictionary for getting tables configuration
     tables_schemas = tables_schema_config['Tables']
-
-    try:
-        # loop for read configurations
-        for table in tables_schemas:
-
+    # loop for read configurations
+    for table in tables_schemas:
+        try:
+       
             # store table_schemas dictionary in a variable
             table_config = tables_schemas[table]
 
@@ -66,51 +65,64 @@ def save_delta_table():
 
             # varible to identify if the path contains data
             exists_data = file_exists(f"{path_table_raw}")
+            
             if exists_data:
                 fields = table_config['fields']
                 schema_fields=[]
-                # identifies what is the schema for the table
+                
+                # identifies what is the schema for the table and concat the fields 
+                
                 for field in fields:
-                    schema_fields.append(StructField(field,fields[field],True))
-                schema_table= StructType(schema_fields)
-
+                    cast_field = f"cast({field} as {fields[field]}) as {field}"
+                    schema_fields.append(cast_field)
+                    #schema_fields.append(StructField(field,fields[field],True))
+                
+                schema_table=f"select {','.join(schema_fields)} from {table}"
+                print(schema_table)
+                
                 # app flow generates an id execution for each process to get data
+                
                 for executions in dbutils.fs.ls(path_table_raw):
                     id_execution=executions[1]
-                    df = spark.read.schema(schema_table).parquet(f"{path_table_raw}{id_execution}")
+                    df = spark.read.option("inferSchema",True).parquet(f"{path_table_raw}{id_execution}")
                     df.createOrReplaceTempView(table)
+                    # identifies if exists data in S3
                     
+                    if file_exists(f"{path_table_silver}"):
+                        dbutils.fs.rm(f"{path_table_silver}",True)
+                    # drop the table if exists into database
+                    
+                    spark.sql(f"drop table if exists {database}.{table}")
                     # identifies when a table has partitions
+                    
                     if partition_by != "":
                         query=f"""
-                                create table if not exists {database}.{table}
-                                using delta
-                                location '{path_table_silver}'
-                                partitioned by ({partition_by})
-                                as
-                                select *
-                                from {table}"""
+                                    create table if not exists {database}.{table}
+                                    using delta
+                                    location '{path_table_silver}'
+                                    partitioned by ({partition_by})
+                                    as
+                                    {schema_table}"""
                     else:
                         query=f"""
                                     create table if not exists {database}.{table}
                                     using delta
                                     location '{path_table_silver}'
                                     as
-                                    select *
-                                    from {table}
-                               """
+                                    {schema_table}"""
                     spark.sql(query)
                     count_read_regs = df.count()
                     query=f"select count(*) as regs from {database}.{table}"
                     count_write_regs = spark.sql(query).collect()[0]["regs"]
                     
                     # save in the log list 
+                    
                     log_file.append([table,"Table Sucessfull Loaded",count_write_regs,count_read_regs])
             else:
                 log_file.append([table,"Don't exist data for the table",0,0])
-    except Exception as e:
-        log_file.append([table,e,0,0])
-
+        except Exception as e:
+            log_file.append([table,"Error loading table please review the code ",0,0])
+            print(e)
     # Convert log list into a Dataframe
     logColumns = ["TableName","Status","Rows_Loaded","Rows_Readed"]
     logdf = spark.createDataFrame(data=log_file, schema = logColumns)
@@ -119,6 +131,11 @@ def save_delta_table():
     return logdf
     
         
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### Function main
 
 # COMMAND ----------
 
