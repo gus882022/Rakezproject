@@ -16,7 +16,6 @@
 
 from config.config_file import *
 from pydeequ import *
-from config.process_raw_silver_full import *
 
 # COMMAND ----------
 
@@ -71,6 +70,29 @@ def main():
 # COMMAND ----------
 
 main()
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC use gold_data_rakez
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC 
+# MAGIC show tables
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC 
+# MAGIC select *
+# MAGIC from candidate_by_campaign
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC select * from candidate_campaign
 
 # COMMAND ----------
 

@@ -9,6 +9,107 @@ from datetime import date
 from pyspark.dbutils import DBUtils
 import pandas
 
+##############################################################################################FUNCTIONS########################################################################################################
+
+
+# Method for validating if a file exists
+def file_exists(path)-> BooleanType:
+  try:
+    dbutils = DBUtils(spark)
+    dbutils.fs.ls(path)
+    return True
+  except Exception as e:
+    if 'java.io.FileNotFoundException' in str(e):
+      return False
+    else:
+      raise
+
+# Convert Dataframe pyspark to pandas
+def convert_df_pandas(df):
+    df_pandas=df.toPandas()
+    return df_pandas
+
+# UDF for send notifications
+def send_notification(subject,msg):
+    region = aws_parameters['region']
+    charset = "UTF-8"
+    ses_client = boto3.client("ses", region_name=aws_parameters['region'])
+    html_content = msg
+    response = ses_client.send_email(
+        Destination={
+            "ToAddresses": [
+                "gustavo.barrera@evalueserve.com",
+            ],
+        },
+        Message={
+            "Body": {
+                "Html": {
+                    "Charset": charset,
+                    "Data": html_content,
+                }
+            },
+            "Subject": {
+                "Charset": charset,
+                "Data": subject,
+            },
+        },
+        Source="gustavo.barrera@evalueserve.com",
+    )
+    
+# UDF for calculate candidates by campaigns
+def candidate_by_campaign(db_source,db_target,table_name,path,partition_by)->IntegerType:
+    
+    sql = f"drop table if exists {db_target}.{table_name}"
+    spark.sql(sql)
+    if partition_by != "":
+        sql= f""" create table {db_target}.{table_name}
+                using delta
+                location '{path}'   
+                partitioned by ({partition_by})
+                as 
+                select t1.Id as LeadId, 
+                       t3.Id as CampaignId,
+                       t1.Name as Candidate, 
+                       t1.Company, 
+                       t2.Status, 
+                       t3.Name as Campaign, 
+                       t3.StartDate  as StartDateCampaign, 
+                       t3.EndDate as EndDateCampaign
+                from {db_source}.candidate t1
+                  inner join {db_source}.candidate_campaign t2 
+                              on t1.Id=t2.LeadId
+                  inner join {db_source}.campaign t3 
+                              on t2.CampaignId=t3.Id"""
+    else:
+        sql= f""" create table {db_target}.{table_name}
+                using delta
+                location '{path}'   
+                as  
+                select t1.Id as LeadId,
+                       t3.Id as CampaignId,
+                       t1.Name as Candidate, 
+                       t1.Company, 
+                       t2.Status, 
+                       t3.Name as Campaign, 
+                       t3.StartDate  as StartDateCampaign, 
+                       t3.EndDate as EndDateCampaign
+                from {db_source}.candidate t1
+                  inner join {db_source}.candidate_campaign t2 
+                              on t1.Id=t2.LeadId
+                  inner join {db_source}.campaign t3 
+                              on t2.CampaignId=t3.Id"""
+    spark.sql(sql)
+    sql= f""" select count(*) as regs
+                from {db_source}.candidate t1
+                  inner join {db_source}.candidate_campaign t2 
+                              on t1.Id=t2.LeadId
+                  inner join {db_source}.campaign t3 
+                              on t2.CampaignId=t3.Id"""
+    count_read_regs = spark.sql(sql).collect()[0]["regs"]
+    return count_read_regs
+    
+    
+##############################################################################################PARAMETERS########################################################################################################
 # table_log_file
 log_file = []
 
@@ -85,54 +186,31 @@ tables_schema_config = {
                                                         'path':'Campaign/',
                                                         'partition':[''],
                                                         'primary_key':['Id']
+                                                   },
+                                       'candidate_campaign': {
+                                                        'fields':{'LeadId':"String",
+                                                                  'CampaignId': "String",
+                                                                  'Status': "String",
+                                                                  'CreatedDate': "Date"
+                                                                 },
+                                                        'path':'candidate_campaign/',
+                                                        'partition':[''],
+                                                        'primary_key':['LeadId','CampaignId']
                                                    }
                                     }
                         }
 
-##############################################################################################FUNCTIONS########################################################################################################
+# Dictionary for table with aggregrations
+tables_aggregated = {
+                        'Tables':{
+                                        'candidate_by_campaign': {
+                                                                    'function': candidate_by_campaign,
+                                                                    'path':'candidate_by_campaign/',
+                                                                    'partition':[''],
+                                                                    'primary_key':['LeadId','CampaignId']
+                                                                 }
+                                  }
+                    }
 
 
-# Method for validating if a file exists
-def file_exists(path):
-  try:
-    dbutils = DBUtils(spark)
-    dbutils.fs.ls(path)
-    return True
-  except Exception as e:
-    if 'java.io.FileNotFoundException' in str(e):
-      return False
-    else:
-      raise
-
-# Convert Dataframe pyspark to pandas
-def convert_df_pandas(df):
-    df_pandas=df.toPandas()
-    return df_pandas
-
-# UDF for send notifications
-def send_notification(subject,msg):
-    region = aws_parameters['region']
-    charset = "UTF-8"
-    ses_client = boto3.client("ses", region_name=aws_parameters['region'])
-    html_content = msg
-    response = ses_client.send_email(
-        Destination={
-            "ToAddresses": [
-                "gustavo.barrera@evalueserve.com",
-            ],
-        },
-        Message={
-            "Body": {
-                "Html": {
-                    "Charset": charset,
-                    "Data": html_content,
-                }
-            },
-            "Subject": {
-                "Charset": charset,
-                "Data": subject,
-            },
-        },
-        Source="gustavo.barrera@evalueserve.com",
-    )
 

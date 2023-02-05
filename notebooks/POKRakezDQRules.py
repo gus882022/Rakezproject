@@ -27,6 +27,7 @@ from pyspark.sql.functions import *
 from functools import reduce
 from pyspark.sql import DataFrame
 import re
+from pyspark.sql import functions as F
 from config.config_file import *
 
 import pandas as pd
@@ -192,25 +193,18 @@ def main_dq_rules():
     table_schema = tables_schema_config 
     tables_list = table_schema['Tables']
     for table_name in tables_list:
-        query=f"select * from {database}.{table_name}"
-        df= spark.sql(query)
-        check=None
-        check = Check(spark, CheckLevel.Warning, f"{table_name}  Checks")
-        checkResult_df=read_rules_from_excel_file(table_name,df,check)
-        if checkResult_df != None:
-            complete_df=complete_df.union(checkResult_df.select(['Table Name','Attribute Name','Rule Definition','Domain','DQ Dimension','constraint_status','constraint_message','row_num','total_rows'])) 
+        spark.sql(f"use {database}")
+        df_tables= spark.sql("show tables")
+        if df_tables.filter(F.col('tableName')==f'{table_name}').count() >0:
+            query=f"select * from {database}.{table_name}"
+            df= spark.sql(query)
+            check=None
+            check = Check(spark, CheckLevel.Warning, f"{table_name}  Checks")
+            checkResult_df=read_rules_from_excel_file(table_name,df,check)
+            if checkResult_df != None:
+                complete_df=complete_df.union(checkResult_df.select(['Table Name','Attribute Name','Rule Definition','Domain','DQ Dimension','constraint_status','constraint_message','row_num','total_rows'])) 
     add_new_columns(complete_df)
 
 # COMMAND ----------
 
 main_dq_rules()
-
-# COMMAND ----------
-
-# MAGIC %sql
-# MAGIC select *
-# MAGIC from silver_data_rakez.campaign
-
-# COMMAND ----------
-
-

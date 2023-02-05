@@ -35,6 +35,7 @@ path_raw_datalake = paths_datalake['raw_bucket']
 path_silver_datalake = paths_datalake['silver_bucket']
 date = date_process['today']
 database = databases['silver']
+log_file = []
 
 # COMMAND ----------
 
@@ -44,7 +45,7 @@ database = databases['silver']
 # COMMAND ----------
 
 # spark sql example code
-def save_delta_table():
+def save_delta_table()->DataFrame:
     # read dictionary for getting tables configuration
     tables_schemas = tables_schema_config['Tables']
     # loop for read configurations
@@ -78,7 +79,6 @@ def save_delta_table():
                     #schema_fields.append(StructField(field,fields[field],True))
                 
                 schema_table=f"select {','.join(schema_fields)} from {table}"
-                print(schema_table)
                 
                 # app flow generates an id execution for each process to get data
                 
@@ -139,7 +139,7 @@ def save_delta_table():
 
 # COMMAND ----------
 
-def main_raw_silver_full():
+def main_raw_silver_full()-> None:
     # store the log dataframe
     logdf = save_delta_table()
     
