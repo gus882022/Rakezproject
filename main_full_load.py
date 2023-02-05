@@ -47,6 +47,7 @@ def main():
         create_database_catalog()
         dbutils.notebook.run("notebooks/POKRakezIngestRawFullLoadsparkSQL",0)
         dbutils.notebook.run("notebooks/POKRakezDQRules",0)
+        dbutils.notebook.run("notebooks/POKRakezIngestGoldFullLoadsparkSQL",0)
 
 
         # Send finish notification 
@@ -61,38 +62,6 @@ def main():
         msg=f"""Error creating databases in databricks please review ERROR is: {e}"""
         send_notification(subject=subject,msg=msg)
         
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ### Execute main process
-
-# COMMAND ----------
-
-main()
-
-# COMMAND ----------
-
-# MAGIC %sql
-# MAGIC use gold_data_rakez
-
-# COMMAND ----------
-
-# MAGIC %sql
-# MAGIC 
-# MAGIC show tables
-
-# COMMAND ----------
-
-# MAGIC %sql
-# MAGIC 
-# MAGIC select *
-# MAGIC from candidate_by_campaign
-
-# COMMAND ----------
-
-# MAGIC %sql
-# MAGIC select * from candidate_campaign
 
 # COMMAND ----------
 

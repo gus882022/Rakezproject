@@ -45,7 +45,7 @@ log_file = []
 # COMMAND ----------
 
 # spark sql example code
-def save_delta_table()->DataFrame:
+def save_delta_table() -> DataFrame:
     # read dictionary for getting tables configuration
     tables_schemas = tables_schema_config['Tables']
     # loop for read configurations
@@ -139,7 +139,7 @@ def save_delta_table()->DataFrame:
 
 # COMMAND ----------
 
-def main_raw_silver_full()-> None:
+def main_raw_silver_full() -> None:
     # store the log dataframe
     logdf = save_delta_table()
     

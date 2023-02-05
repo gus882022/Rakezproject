@@ -72,7 +72,7 @@ def save_delta_table() -> DataFrame:
             count_read_regs = function(db_source=database_source,db_target=database_target,table_name=table,path=path_table_gold,partition_by=partition)
 
             # save in the log list 
-            query=f"select count(*) as regs from {database}.{table}"
+            query=f"select count(*) as regs from {database_target}.{table}"
 
             count_write_regs = spark.sql(query).collect()[0]["regs"]         
 

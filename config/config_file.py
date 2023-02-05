@@ -107,7 +107,39 @@ def candidate_by_campaign(db_source,db_target,table_name,path,partition_by)->Int
                               on t2.CampaignId=t3.Id"""
     count_read_regs = spark.sql(sql).collect()[0]["regs"]
     return count_read_regs
+
+# UDF for calculate status by campaigns
+def status_by_campaign(db_source,db_target,table_name,path,partition_by)->IntegerType:
     
+    sql = f"drop table if exists {db_target}.{table_name}"
+    spark.sql(sql)
+    if partition_by != "":
+        sql= f""" create table {db_target}.{table_name}
+                using delta
+                location '{path}'   
+                partitioned by ({partition_by})
+                as 
+                select status,count(*) cnt_status_campaign
+                from {db_source}.campaign
+                group by status"""
+    else:
+        sql= f""" create table {db_target}.{table_name}
+                using delta
+                location '{path}'   
+                as 
+                select status,count(*) cnt_status_campaign
+                from {db_source}.campaign
+                group by status"""
+        
+    spark.sql(sql)
+    
+    sql= f""" select count(*) as regs
+                from (select status,count(*) cnt_status_campaign
+                      from {db_source}.campaign
+                       group by status) t1"""
+    count_read_regs = spark.sql(sql).collect()[0]["regs"]
+    return count_read_regs
+
     
 ##############################################################################################PARAMETERS########################################################################################################
 # table_log_file
@@ -208,6 +240,12 @@ tables_aggregated = {
                                                                     'path':'candidate_by_campaign/',
                                                                     'partition':[''],
                                                                     'primary_key':['LeadId','CampaignId']
+                                                                 },
+                                        'status_by_campaign':    {
+                                                                    'function': status_by_campaign,
+                                                                    'path':'status_by_campaign/',
+                                                                    'partition':[''],
+                                                                    'primary_key':['status']
                                                                  }
                                   }
                     }
