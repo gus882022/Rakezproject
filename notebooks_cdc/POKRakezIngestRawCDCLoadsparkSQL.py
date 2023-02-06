@@ -18,7 +18,7 @@ from pyspark.sql.types import *
 from pyspark.sql import SparkSession
 import time
 import json
-from config.config_file import *
+from notebooks_cdc.cdc_config.config_file_cdc import *
 from pyspark.sql import functions as F
 from pyspark.sql.functions import *
 from pyspark.sql.functions import col
@@ -58,14 +58,28 @@ def save_delta_table() -> DataFrame:
             # define how the table is partitioned
             partition_by = ",".join(table_config['partition'])
 
-            # varible to identify the path from raw zone
+            # variable to identify the path from raw zone
             path_table_raw = f"{path_raw_datalake}/{table_config['path']}"
 
-            # varible to identify the path from silver zone
+            # variable to identify the path from silver zone
             path_table_silver = f"{path_silver_datalake}/{table_config['path']}"
 
-            # varible to identify if the path contains data
+            # variable to identify if the path contains data
             exists_data = file_exists(f"{path_table_raw}")
+            
+            # variable to identify the load type of the table ( Cdc- incremental, full load)
+            type = table_config['type']
+            
+            
+            count_read_regs = 0
+            
+            count_write_regs = 0
+            
+            count_update_regs = 0
+            
+            count_deleted_regs = 0
+            
+            
             
             if exists_data:
                 fields = table_config['fields']
@@ -87,16 +101,17 @@ def save_delta_table() -> DataFrame:
                     df = spark.read.option("inferSchema",True).parquet(f"{path_table_raw}{id_execution}")
                     df.createOrReplaceTempView(table)
                     count_read_regs = df.count()
-                    # identifies if exists data in S3
-                    
-                    if file_exists(f"{path_table_silver}"):
-                        dbutils.fs.rm(f"{path_table_silver}",True)
-                    
-                    count_write_regs = create_table(db=database,table_name=table,path_table=path_table_silver,partition=partition_by,schema=schema_table)
+                    # identifies if exists data in S3 if not exists the process create the table
+                    if not file_exists(f"{path_table_silver}"):
+                        count_write_regs = create_table(db=database,table_name=table,path_table=path_table_silver,partition=partition_by,schema=schema_table)
+                        log_file.append([table,"Table Sucessfull Loaded",count_write_regs,count_read_regs,count_update_regs,count_deleted_regs])
+                            
+                    if type == "FULL":
+                        
                     
                     # save in the log list 
                     
-                    log_file.append([table,"Table Sucessfull Loaded",count_write_regs,count_read_regs])
+                    log_file.append([table,"Table Sucessfull Loaded",count_write_regs,count_read_regs,count_update_regs,count_deleted_regs])
             else:
                 log_file.append([table,"Don't exist data for the table",0,0])
         except Exception as e:
@@ -127,14 +142,13 @@ def main_raw_silver_full() -> None:
     
     # variable for design email in HTML format
     html_content = f"""\
-    <html>
-      <head></head>
-      <body>
-        <p> Log for day {date} </p>
-        {log_df.to_html()}
-      </body>
-    </html>
-    """
+                          <html>
+                            <head></head>
+                            <body>
+                              <p> Log for day {date} </p>
+                              {log_df.to_html()}
+                            </body>
+                          </html>"""
     
     # send notification to the email
     send_notification(subject=f"RAW TO SILVER ZONE FULL LOAD -> LOG FOR DAY {date} ",msg=html_content)
@@ -142,6 +156,28 @@ def main_raw_silver_full() -> None:
 # COMMAND ----------
 
 main_raw_silver_full()
+
+# COMMAND ----------
+
+regs_deleted = spark.sql("delete from silver_data_rakez.account")
+
+# COMMAND ----------
+
+print(regs_deleted.collect()[0]["num_affected_rows"])
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC describe table silver_data_rakez.account
+
+# COMMAND ----------
+
+display(regs_deleted)
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC select *  FROM table_changes('silver_data_rakez.account', 2, 5)
 
 # COMMAND ----------
 

@@ -99,8 +99,6 @@ def candidate_by_campaign(db_source,db_target,table_name,path,partition_by)->Int
                   inner join {db_source}.campaign t3 
                               on t2.CampaignId=t3.Id"""
     spark.sql(sql)
-    sql =f"alter table {db_target}.{table_name} SET TBLPROPERTIES (delta.enableChangeDataFeed = true)"
-    spark.sql(sql)
     sql= f""" select count(*) as regs
                 from {db_source}.candidate t1
                   inner join {db_source}.candidate_campaign t2 
@@ -134,8 +132,7 @@ def status_by_campaign(db_source,db_target,table_name,path,partition_by)->Intege
                 group by status"""
         
     spark.sql(sql)
-    sql =f"alter table {db_target}.{table_name} SET TBLPROPERTIES (delta.enableChangeDataFeed = true)"
-    spark.sql(sql)
+    
     sql= f""" select count(*) as regs
                 from (select status,count(*) cnt_status_campaign
                       from {db_source}.campaign
@@ -190,7 +187,7 @@ databases={
           }
 # Dictionary of paths from datalake in point mount
 paths_datalake={
-                    'raw_bucket':'s3a://demodmsgbraw',
+                    'raw_bucket':'s3a://demodmsgbraw/cdc',
                     'silver_bucket':'s3a://demodmsgbsilver',
                     'gold_bucket':'s3a://demodmsgbgold'
                }

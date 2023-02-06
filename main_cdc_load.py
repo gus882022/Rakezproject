@@ -65,4 +65,8 @@ def main():
 
 # COMMAND ----------
 
-main()
+condition = []
+for x in primary_key:
+    condition.append(f"source.{x}=target.{x}")
+    
+print(" and ".join(condition))
