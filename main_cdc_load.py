@@ -45,9 +45,9 @@ def main():
 
         # create databases into databricks system
         create_database_catalog()
-        dbutils.notebook.run("notebooks/POKRakezIngestRawFullLoadsparkSQL",0)
+        dbutils.notebook.run("notebooks_cdc/POKRakezIngestRawCDCLoadsparkSQL",0)
         dbutils.notebook.run("notebooks/POKRakezDQRules",0)
-        dbutils.notebook.run("notebooks/POKRakezIngestGoldFullLoadsparkSQL",0)
+        dbutils.notebook.run("notebooks_cdc/POKRakezIngestGoldCDCLoadsparkSQL",0)
 
 
         # Send finish notification 
@@ -65,8 +65,14 @@ def main():
 
 # COMMAND ----------
 
-condition = []
-for x in primary_key:
-    condition.append(f"source.{x}=target.{x}")
-    
-print(" and ".join(condition))
+main()
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC 
+# MAGIC select * from silver_data_rakez.
+
+# COMMAND ----------
+
+
