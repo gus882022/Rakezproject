@@ -182,8 +182,6 @@ def merge_operation_data(db,table_name,condition,operation) -> ArrayType:
     rows_updated = 0
     rows_deleted = 0
     rows = []
-    
-    spark.sql(f"select * from {table_name}").show()
         
     if operation =='FULL':
         
@@ -201,7 +199,7 @@ def merge_operation_data(db,table_name,condition,operation) -> ArrayType:
                       using {table_name} source on {condition}
                       when matched and source.IsDeleted = True
                       then delete"""
-        print(query)
+     
         regs_affected=spark.sql(query)
 
         rows_deleted=regs_affected.select(col('num_deleted_rows')).collect()[0]["num_deleted_rows"]
@@ -212,7 +210,7 @@ def merge_operation_data(db,table_name,condition,operation) -> ArrayType:
                   when matched then update set *
                   when not matched and source.IsDeleted = False then insert * """    
 
-    print(query)
+ 
     regs_affected=spark.sql(query)
 
     rows_updated = regs_affected.select(col('num_updated_rows')).collect()[0]["num_updated_rows"]
