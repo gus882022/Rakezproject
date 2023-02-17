@@ -145,7 +145,7 @@ def status_by_campaign(db_source,db_target,table_name,path,partition_by)->Intege
     return count_read_regs
 
 
-# UDF for creating tablen into the database
+# UDF for creating table into the database
 def create_table(db,table_name,path_table,partition,schema) -> IntegerType:
     # drop the table if exists into database
     spark.sql(f"drop table if exists {db}.{table_name}")
