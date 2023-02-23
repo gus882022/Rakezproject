@@ -39,7 +39,7 @@ def send_notification(subject,msg):
     response = ses_client.send_email(
         Destination={
             "ToAddresses": [
-                "gustavo.barrera@evalueserve.com",
+                "gus882003@gmail.com",
             ],
         },
         Message={
@@ -54,7 +54,7 @@ def send_notification(subject,msg):
                 "Data": subject,
             },
         },
-        Source="gustavo.barrera@evalueserve.com",
+        Source="gus882003@gmail.com",
     )
     
 # UDF for calculate candidates by campaigns
